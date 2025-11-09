@@ -34,6 +34,50 @@ class CaroGame {
         this.createRoomModal = document.getElementById('createRoomModal');
         this.joinRoomModal = document.getElementById('joinRoomModal');
         this.gameOverModal = document.getElementById('gameOverModal');
+  this.createPlayerNameInput = document.getElementById('createPlayerNameInput');
+        this.joinPlayerNameInput = document.getElementById('joinPlayerNameInput');
+        this.joinRoomIdInput = document.getElementById('joinRoomIdInput');
+
+        this.confirmCreateRoom = document.getElementById('confirmCreateRoom');
+        this.cancelCreateRoom = document.getElementById('cancelCreateRoom');
+        this.confirmJoinRoom = document.getElementById('confirmJoinRoom');
+        this.cancelJoinRoom = document.getElementById('cancelJoinRoom');
+
+        this.playAgain = document.getElementById('playAgain');
+        this.closeGameOver = document.getElementById('closeGameOver');
+        this.chatMessages = document.getElementById('chatMessages');
+        this.messageInput = document.getElementById('messageInput');
+        this.sendBtn = document.getElementById('sendBtn');
+    }
+
+    setupEventListeners() {
+        // Create room flow
+        this.createRoomBtn.addEventListener('click', () => {
+            this.openModal(this.createRoomModal);
+            this.createPlayerNameInput.focus();
+        });
+
+        this.confirmCreateRoom.addEventListener('click', () => {
+            const playerName = this.createPlayerNameInput.value.trim();
+            if (!playerName) {
+                this.showNotification('Vui lòng nhập tên của bạn', 'error');
+                return;
+            }
+            this.socket.emit('createRoom', { playerName });
+            this.createPlayerNameInput.value = '';
+            this.closeModal(this.createRoomModal);
+        });
+
+        this.cancelCreateRoom.addEventListener('click', () => {
+            this.closeModal(this.createRoomModal);
+            this.createPlayerNameInput.value = '';
+        });
+
+        // Join room flow
+        this.joinRoomBtn.addEventListener('click', () => {
+            this.openModal(this.joinRoomModal);
+            this.joinPlayerNameInput.focus();
+        });
 
         
     }
