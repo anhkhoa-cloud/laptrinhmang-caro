@@ -6,3 +6,50 @@
     <title>Game Caro Online</title>
     <link rel="stylesheet" href="style.css">
 </head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Game Caro Online</h1>
+            <div class="game-info">
+                <div id="gameStatus">Đang chờ người chơi...</div>
+                <div id="currentPlayer">Lượt: Chưa xác định</div>
+                <div id="roomInfo">Phòng: <span id="roomIdDisplay">---</span><button id="copyRoomIdBtn" class="btn btn-secondary btn-copy" title="Sao chép mã phòng">Copy</button></div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="game-area">
+                <div class="players-info">
+                    <div class="player" id="player1">
+                        <span class="player-name">Người chơi 1</span>
+                        <span class="player-symbol">X</span>
+                    </div>
+                    <div class="player" id="player2">
+                        <span class="player-name">Người chơi 2</span>
+                        <span class="player-symbol">O</span>
+                    </div>
+                </div>
+
+                <div class="board-container">
+                    <div id="gameBoard" class="board"></div>
+                </div>
+
+                <div class="game-controls">
+                    <button id="createRoomBtn" class="btn btn-primary">Tạo phòng mới</button>
+                    <button id="joinRoomBtn" class="btn btn-join">Tham gia phòng</button>
+                    <button id="leaveRoomBtn" class="btn btn-secondary">Rời phòng</button>
+                    <button id="resetBtn" class="btn btn-reset">Chơi lại</button>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <h3>💬 Chat</h3>
+                </div>
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." maxlength="100">
+                    <button id="sendBtn" class="btn btn-send">Gửi</button>
+                </div>
+            </div>
+        </div>
