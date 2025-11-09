@@ -34,52 +34,66 @@ class CaroGame {
         this.createRoomModal = document.getElementById('createRoomModal');
         this.joinRoomModal = document.getElementById('joinRoomModal');
         this.gameOverModal = document.getElementById('gameOverModal');
-  this.createPlayerNameInput = document.getElementById('createPlayerNameInput');
-        this.joinPlayerNameInput = document.getElementById('joinPlayerNameInput');
-        this.joinRoomIdInput = document.getElementById('joinRoomIdInput');
+ updateGameDisplay() {
+        if (!this.gameState) {
+            return;
+        }
 
-        this.confirmCreateRoom = document.getElementById('confirmCreateRoom');
-        this.cancelCreateRoom = document.getElementById('cancelCreateRoom');
-        this.confirmJoinRoom = document.getElementById('confirmJoinRoom');
-        this.cancelJoinRoom = document.getElementById('cancelJoinRoom');
+        if (this.gameState.roomId) {
+            this.roomId = this.gameState.roomId;
+        }
+        this.updateRoomInfoUI();
 
-        this.playAgain = document.getElementById('playAgain');
-        this.closeGameOver = document.getElementById('closeGameOver');
-        this.chatMessages = document.getElementById('chatMessages');
-        this.messageInput = document.getElementById('messageInput');
-        this.sendBtn = document.getElementById('sendBtn');
-    }
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                const cell = this.gameBoard.children[row * 15 + col];
+                const value = this.gameState.board[row][col];
 
-    setupEventListeners() {
-        // Create room flow
-        this.createRoomBtn.addEventListener('click', () => {
-            this.openModal(this.createRoomModal);
-            this.createPlayerNameInput.focus();
-        });
-
-        this.confirmCreateRoom.addEventListener('click', () => {
-            const playerName = this.createPlayerNameInput.value.trim();
-            if (!playerName) {
-                this.showNotification('Vui lòng nhập tên của bạn', 'error');
-                return;
+                cell.textContent = value || '';
+                cell.className = 'cell';
+                if (value) {
+                    cell.classList.add(value.toLowerCase());
+                }
             }
-            this.socket.emit('createRoom', { playerName });
-            this.createPlayerNameInput.value = '';
-            this.closeModal(this.createRoomModal);
-        });
+        }
 
-        this.cancelCreateRoom.addEventListener('click', () => {
-            this.closeModal(this.createRoomModal);
-            this.createPlayerNameInput.value = '';
-        });
+        const players = this.gameState.players || {};
+        const currentSymbol = this.gameState.currentPlayer;
+        const currentPlayerInfo = Object.values(players).find((player) => player.symbol === currentSymbol);
 
-        // Join room flow
-        this.joinRoomBtn.addEventListener('click', () => {
-            this.openModal(this.joinRoomModal);
-            this.joinPlayerNameInput.focus();
-        });
+        switch (this.gameState.gameStatus) {
+            case 'waiting':
+                this.gameStatus.textContent = 'Đang chờ người chơi...';
+                this.currentPlayer.textContent = 'Lượt: Chưa xác định';
+                break;
+            case 'playing':
+                this.gameStatus.textContent = 'Game đang diễn ra';
+                if (currentPlayerInfo) {
+                    this.currentPlayer.textContent = `Lượt: ${currentPlayerInfo.name} (${currentPlayerInfo.symbol})`;
+                } else {
+                    this.currentPlayer.textContent = `Lượt: ${currentSymbol || '...'}`;
+                }
+                break;
+            case 'finished':
+                this.gameStatus.textContent = 'Game đã kết thúc';
+                if (this.gameState.winner === 'draw') {
+                    this.currentPlayer.textContent = 'Kết quả: Hòa';
+                } else {
+                    const winnerInfo = Object.values(players).find((player) => player.symbol === this.gameState.winner);
+                    if (winnerInfo) {
+                        this.currentPlayer.textContent = `Người thắng: ${winnerInfo.name} (${winnerInfo.symbol})`;
+                    } else {
+                        this.currentPlayer.textContent = `Người thắng: ${this.gameState.winner}`;
+                    }
+                }
+                break;
+            default:
+                this.gameStatus.textContent = 'Trạng thái không xác định';
+                this.currentPlayer.textContent = '';
+        }
 
-        
+        this.updatePlayersInfo(players);
+    }
     }
   
 }
