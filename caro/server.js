@@ -92,3 +92,45 @@ function broadcastRoomUpdate(roomId) {
     if (!room) return;
     io.to(roomId).emit('gameUpdate', getPublicRoomState(room));
 }
+
+function checkWin(board, row, col, symbol) {
+    const directions = [
+        [0, 1],   
+        [1, 0],   
+        [1, 1],   
+        [1, -1]   
+    ];
+
+    for (const [dx, dy] of directions) {
+        const cells = [[row, col]];
+        let count = 1;
+
+  
+        for (let step = 1; step < WIN_CONDITION; step++) {
+            const newRow = row + step * dx;
+            const newCol = col + step * dy;
+            if (newRow >= 0 && newRow < BOARD_SIZE && newCol >= 0 && newCol < BOARD_SIZE && board[newRow][newCol] === symbol) {
+                cells.push([newRow, newCol]);
+                count++;
+            } else break;
+        }
+
+       
+        for (let step = 1; step < WIN_CONDITION; step++) {
+            const newRow = row - step * dx;
+            const newCol = col - step * dy;
+            if (newRow >= 0 && newRow < BOARD_SIZE && newCol >= 0 && newCol < BOARD_SIZE && board[newRow][newCol] === symbol) {
+                cells.unshift([newRow, newCol]);
+                count++;
+            } else break;
+        }
+
+        if (count >= WIN_CONDITION) return cells.slice(0, WIN_CONDITION);
+    }
+    return null;
+}
+
+function checkDraw(board) {
+    return board.every(row => row.every(cell => cell !== null));
+}
+
