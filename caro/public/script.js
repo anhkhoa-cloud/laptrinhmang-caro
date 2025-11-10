@@ -49,6 +49,133 @@ class CaroGame {
         this.chatMessages = document.getElementById('chatMessages');
         this.messageInput = document.getElementById('messageInput');
         this.sendBtn = document.getElementById('sendBtn');
+    }
+    setupEventListeners() {
+        // Create room flow
+        this.createRoomBtn.addEventListener('click', () => {
+            this.openModal(this.createRoomModal);
+            this.createPlayerNameInput.focus();
+        });
+
+        this.confirmCreateRoom.addEventListener('click', () => {
+            const playerName = this.createPlayerNameInput.value.trim();
+            if (!playerName) {
+                this.showNotification('Vui lòng nhập tên của bạn', 'error');
+                return;
+            }
+            this.socket.emit('createRoom', { playerName });
+            this.createPlayerNameInput.value = '';
+            this.closeModal(this.createRoomModal);
+        });
+
+        this.cancelCreateRoom.addEventListener('click', () => {
+            this.closeModal(this.createRoomModal);
+            this.createPlayerNameInput.value = '';
+        });
+
+        // Join room flow
+        this.joinRoomBtn.addEventListener('click', () => {
+            this.openModal(this.joinRoomModal);
+            this.joinPlayerNameInput.focus();
+        });
+
+        this.confirmJoinRoom.addEventListener('click', () => {
+            const playerName = this.joinPlayerNameInput.value.trim();
+            const roomId = this.joinRoomIdInput.value.trim().toUpperCase();
+
+            if (!playerName || !roomId) {
+                this.showNotification('Vui lòng nhập tên và mã phòng', 'error');
+                return;
+            }
+
+            this.socket.emit('joinRoom', { playerName, roomId });
+            this.joinPlayerNameInput.value = '';
+            this.joinRoomIdInput.value = '';
+            this.closeModal(this.joinRoomModal);
+        });
+
+        this.cancelJoinRoom.addEventListener('click', () => {
+            this.closeModal(this.joinRoomModal);
+            this.joinPlayerNameInput.value = '';
+            this.joinRoomIdInput.value = '';
+        });
+
+        // Reset game
+        this.resetBtn.addEventListener('click', () => {
+            if (!this.roomId) {
+                this.showNotification('Bạn cần tham gia phòng trước khi reset', 'error');
+                return;
+            }
+            this.socket.emit('resetGame');
+        });
+
+        if (this.leaveRoomBtn) {
+            this.leaveRoomBtn.addEventListener('click', () => {
+                if (!this.roomId) {
+                    this.showNotification('Bạn chưa tham gia phòng', 'error');
+                    return;
+                }
+                this.socket.emit('leaveRoom');
+            });
+        }
+
+        // Game over modal
+        this.playAgain.addEventListener('click', () => {
+            if (!this.roomId) {
+                this.gameOverModal.style.display = 'none';
+                return;
+            }
+            this.socket.emit('resetGame');
+            this.gameOverModal.style.display = 'none';
+        });
+
+        this.closeGameOver.addEventListener('click', () => {
+            this.gameOverModal.style.display = 'none';
+        });
+
+        // Chat
+        this.sendBtn.addEventListener('click', () => {
+            this.sendMessage();
+        });
+
+        this.messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.sendMessage();
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === this.createRoomModal) {
+                this.closeModal(this.createRoomModal);
+            }
+            if (e.target === this.joinRoomModal) {
+                this.closeModal(this.joinRoomModal);
+            }
+            if (e.target === this.gameOverModal) {
+                this.gameOverModal.style.display = 'none';
+            }
+        });
+
+        if (this.copyRoomIdBtn) {
+            this.copyRoomIdBtn.addEventListener('click', () => {
+                if (!this.roomId) {
+                    this.showNotification('Chưa có mã phòng để sao chép', 'error');
+                    return;
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(this.roomId)
+                        .then(() => this.showNotification(`Đã sao chép mã phòng ${this.roomId}`))
+                        .catch(() => this.showNotification('Không thể sao chép mã phòng', 'error'));
+                } else {
+                    this.showNotification('Trình duyệt không hỗ trợ sao chép tự động', 'error');
+                }
+            });
+        }
+    }
+
+    
  updateGameDisplay() {
         if (!this.gameState) {
             return;
