@@ -34,6 +34,21 @@ class CaroGame {
         this.createRoomModal = document.getElementById('createRoomModal');
         this.joinRoomModal = document.getElementById('joinRoomModal');
         this.gameOverModal = document.getElementById('gameOverModal');
+
+        this.createPlayerNameInput = document.getElementById('createPlayerNameInput');
+        this.joinPlayerNameInput = document.getElementById('joinPlayerNameInput');
+        this.joinRoomIdInput = document.getElementById('joinRoomIdInput');
+
+        this.confirmCreateRoom = document.getElementById('confirmCreateRoom');
+        this.cancelCreateRoom = document.getElementById('cancelCreateRoom');
+        this.confirmJoinRoom = document.getElementById('confirmJoinRoom');
+        this.cancelJoinRoom = document.getElementById('cancelJoinRoom');
+
+        this.playAgain = document.getElementById('playAgain');
+        this.closeGameOver = document.getElementById('closeGameOver');
+        this.chatMessages = document.getElementById('chatMessages');
+        this.messageInput = document.getElementById('messageInput');
+        this.sendBtn = document.getElementById('sendBtn');
  updateGameDisplay() {
         if (!this.gameState) {
             return;
