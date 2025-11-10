@@ -263,6 +263,96 @@ class CaroGame {
             this.player2.classList.remove('active');
         }
     } 
+     highlightWinningCells(result) {
+        const cells = this.gameBoard.querySelectorAll('.cell');
+        cells.forEach(cell => cell.classList.remove('winning'));
+
+        if (!result || result.winner === 'draw') {
+            return;
+        }
+
+        if (Array.isArray(result.winningCells) && result.winningCells.length) {
+            result.winningCells.forEach(([row, col]) => {
+                const index = row * 15 + col;
+                const cell = this.gameBoard.children[index];
+                if (cell) {
+                    cell.classList.add('winning');
+                }
+            });
+        } else {
+            cells.forEach(cell => {
+                if (cell.textContent === result.winner) {
+                    cell.classList.add('winning');
+                }
+            });
+        }
+    }
+
+    showGameOver(data) {
+        const title = document.getElementById('gameOverTitle');
+        const message = document.getElementById('gameOverMessage');
+        
+        if (data.winner === 'draw') {
+            title.textContent = 'Hòa!';
+            message.textContent = 'Cả hai người chơi đều xuất sắc!';
+        } else {
+            title.textContent = 'Game kết thúc!';
+            message.textContent = `${data.winnerName} (${data.winner}) đã thắng!`;
+        }
+        
+        this.gameOverModal.style.display = 'block';
+    }
+
+    clearBoard() {
+        const cells = this.gameBoard.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            cell.textContent = '';
+            cell.className = 'cell';
+        });
+    }
+
+    sendMessage() {
+        const message = this.messageInput.value.trim();
+        if (!this.roomId) {
+            this.showNotification('Bạn cần tham gia phòng để chat', 'error');
+            return;
+        }
+        if (message) {
+            this.socket.emit('chatMessage', { message });
+            this.messageInput.value = '';
+        }
+    }
+
+    addChatMessage(data) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+
+        const isOwnMessage = data.playerId && data.playerId === this.playerId;
+
+        messageDiv.classList.add(isOwnMessage ? 'own' : 'other');
+
+        const info = document.createElement('div');
+        info.className = 'message-info';
+        const symbol = data.symbol ? ` (${data.symbol})` : '';
+        info.textContent = `${data.player}${symbol} - ${data.timestamp}`;
+
+        const content = document.createElement('div');
+        content.textContent = data.message;
+
+        messageDiv.appendChild(info);
+        messageDiv.appendChild(content);
+
+        this.chatMessages.appendChild(messageDiv);
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+
+    updateRoomInfoUI() {
+        const hasRoom = Boolean(this.roomId);
+        this.roomIdDisplay.textContent = hasRoom ? this.roomId : '---';
+
+        if (this.copyRoomIdBtn) {
+            this.copyRoomIdBtn.style.visibility = hasRoom ? 'visible' : 'hidden';
+            this.copyRoomIdBtn.disabled = !hasRoom;
     }
   
-}
+
