@@ -94,6 +94,33 @@ class CaroGame {
 
         this.updatePlayersInfo(players);
     }
+        updatePlayersInfo(players = {}) {
+        const playerEntries = Object.values(players);
+        const player1Info = playerEntries[0];
+        const player2Info = playerEntries[1];
+
+        if (player1Info) {
+            this.player1.querySelector('.player-name').textContent = player1Info.name;
+            this.player1.querySelector('.player-symbol').textContent = player1Info.symbol;
+            this.player1.classList.toggle('active', 
+                this.gameState && this.gameState.currentPlayer === player1Info.symbol);
+        } else {
+            this.player1.querySelector('.player-name').textContent = 'Chờ người chơi...';
+            this.player1.querySelector('.player-symbol').textContent = 'X';
+            this.player1.classList.remove('active');
+        }
+
+        if (player2Info) {
+            this.player2.querySelector('.player-name').textContent = player2Info.name;
+            this.player2.querySelector('.player-symbol').textContent = player2Info.symbol;
+            this.player2.classList.toggle('active', 
+                this.gameState && this.gameState.currentPlayer === player2Info.symbol);
+        } else {
+            this.player2.querySelector('.player-name').textContent = 'Chờ người chơi...';
+            this.player2.querySelector('.player-symbol').textContent = 'O';
+            this.player2.classList.remove('active');
+        }
+    } 
     }
   
 }
