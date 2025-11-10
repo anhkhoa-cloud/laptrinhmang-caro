@@ -51,7 +51,7 @@ class CaroGame {
         this.sendBtn = document.getElementById('sendBtn');
     }
     setupEventListeners() {
-        // Create room flow
+       
         this.createRoomBtn.addEventListener('click', () => {
             this.openModal(this.createRoomModal);
             this.createPlayerNameInput.focus();
