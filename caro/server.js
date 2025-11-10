@@ -134,3 +134,66 @@ function checkDraw(board) {
     return board.every(row => row.every(cell => cell !== null));
 }
 
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('createRoom', ({ playerName }) => {
+        const name = sanitizeName(playerName);
+        if (!name) return socket.emit('error', 'Vui lòng nhập tên');
+        const roomId = generateRoomId();
+        const room = createRoom(roomId);
+        rooms[roomId] = room;
+
+        const player = addPlayerToRoom(socket, room, name);
+        socket.emit('roomCreated', { roomId });
+        io.to(roomId).emit('gameUpdate', getPublicRoomState(room));
+    });
+
+    socket.on('joinRoom', ({ roomId, playerName }) => {
+        const name = sanitizeName(playerName);
+        const id = sanitizeRoomId(roomId);
+        const room = rooms[id];
+        if (!room) return socket.emit('error', 'Phòng không tồn tại');
+        if (Object.keys(room.players).length >= MAX_PLAYERS_PER_ROOM)
+            return socket.emit('error', 'Phòng đã đủ người');
+
+        const player = addPlayerToRoom(socket, room, name);
+        io.to(id).emit('gameUpdate', getPublicRoomState(room));
+
+        if (Object.keys(room.players).length === MAX_PLAYERS_PER_ROOM) {
+            resetRoom(room);
+            room.gameStatus = 'playing';
+            io.to(id).emit('gameStarted', getPublicRoomState(room));
+        }
+    });
+
+    socket.on('makeMove', ({ row, col }) => {
+        const room = rooms[socket.roomId];
+        if (!room) return;
+        const player = room.players[socket.id];
+        if (!player || room.gameStatus !== 'playing') return;
+        if (room.currentPlayer !== player.symbol) return;
+        if (room.board[row][col]) return;
+
+        room.board[row][col] = player.symbol;
+        const winCells = checkWin(room.board, row, col, player.symbol);
+
+        if (winCells) {
+            room.gameStatus = 'finished';
+            room.winner = player.symbol;
+            room.winningCells = winCells;
+            io.to(room.roomId).emit('gameFinished', { ...getPublicRoomState(room) });
+        } else if (checkDraw(room.board)) {
+            room.gameStatus = 'finished';
+            room.winner = 'draw';
+            io.to(room.roomId).emit('gameFinished', { ...getPublicRoomState(room) });
+        } else {
+            room.currentPlayer = room.currentPlayer === 'X' ? 'O' : 'X';
+            broadcastRoomUpdate(room.roomId);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
