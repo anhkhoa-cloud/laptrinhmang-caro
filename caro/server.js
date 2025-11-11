@@ -197,3 +197,33 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
+
+function getLocalIPv4Addresses() {
+    const interfaces = os.networkInterfaces();
+    const addresses = [];
+
+    for (const iface of Object.values(interfaces)) {
+        if (!iface) continue;
+        for (const config of iface) {
+            if (config.family === 'IPv4' && !config.internal) {
+                addresses.push(config.address);
+            }
+        }
+    }
+
+    return addresses;
+}
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Open http://localhost:${PORT} to play the game`);
+
+    const localIPs = getLocalIPv4Addresses();
+    if (localIPs.length > 0) {
+        console.log('Share one of these addresses with your friends on the same network:');
+        localIPs.forEach((ip) => console.log(`  → http://${ip}:${PORT}`));
+    } else {
+        console.log('Unable to detect local network IP address.');
+    }
+});
