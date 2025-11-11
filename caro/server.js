@@ -193,6 +193,67 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('chatMessage', ({ message }) => {
+        const trimmedMessage = String(message || '').trim();
+        if (!trimmedMessage) {
+            return;
+        }
+
+        const { roomId } = socket;
+        const room = rooms[roomId];
+        if (!room) {
+            socket.emit('error', 'Bạn chưa tham gia phòng');
+            return;
+        }
+
+        const player = room.players[socket.id];
+        if (!player) {
+            socket.emit('error', 'Bạn chưa tham gia phòng');
+            return;
+        }
+
+        io.to(roomId).emit('chatMessage', {
+            roomId,
+            playerId: socket.id,
+            player: player.name,
+            symbol: player.symbol,
+            message: trimmedMessage,
+            timestamp: new Date().toLocaleTimeString('vi-VN', { hour12: false })
+        });
+    });
+
+    socket.on('resetGame', () => {
+        const { roomId } = socket;
+        const room = rooms[roomId];
+        if (!room) {
+            socket.emit('error', 'Bạn chưa tham gia phòng');
+            return;
+        }
+
+        resetRoom(room);
+        io.to(roomId).emit('gameReset', getPublicRoomState(room));
+
+        if (room.gameStatus === 'playing') {
+            io.to(roomId).emit('gameStarted', getPublicRoomState(room));
+        } else {
+            broadcastRoomUpdate(roomId);
+        }
+    });
+
+    socket.on('leaveRoom', () => {
+        if (!socket.roomId) {
+            socket.emit('error', 'Bạn chưa tham gia phòng');
+            return;
+        }
+
+        const roomId = socket.roomId;
+        handlePlayerLeave(socket);
+        socket.emit('roomLeft', {
+            roomId,
+            message: 'Bạn đã rời phòng.'
+        });
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
     });
