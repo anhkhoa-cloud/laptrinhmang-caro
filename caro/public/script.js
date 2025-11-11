@@ -175,6 +175,7 @@ class CaroGame {
         }
     }
 
+    //setupSocketListeners
 
     createBoard() {
         this.gameBoard.innerHTML = '';
