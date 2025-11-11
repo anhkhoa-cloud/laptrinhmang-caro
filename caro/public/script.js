@@ -354,5 +354,75 @@ class CaroGame {
             this.copyRoomIdBtn.style.visibility = hasRoom ? 'visible' : 'hidden';
             this.copyRoomIdBtn.disabled = !hasRoom;
     }
+        this.setLeaveRoomEnabled(hasRoom);
+    }
+
+    toggleRoomActions(disabled) {
+        this.createRoomBtn.disabled = disabled;
+        this.joinRoomBtn.disabled = disabled;
+    }
+
+    setChatEnabled(enabled) {
+        this.messageInput.disabled = !enabled;
+        this.sendBtn.disabled = !enabled;
+    }
+
+    setLeaveRoomEnabled(enabled) {
+        if (!this.leaveRoomBtn) return;
+        this.leaveRoomBtn.disabled = !enabled;
+        this.leaveRoomBtn.style.visibility = enabled ? 'visible' : 'hidden';
+    }
+
+    clearChat() {
+        this.chatMessages.innerHTML = '';
+    }
+
+    resetClientState(statusMessage = 'Đang chờ người chơi...') {
+        this.roomId = null;
+        this.playerId = null;
+        this.playerSymbol = null;
+        this.gameState = null;
+        this.toggleRoomActions(false);
+        this.setChatEnabled(false);
+        this.setLeaveRoomEnabled(false);
+        this.clearBoard();
+        this.clearChat();
+        this.gameStatus.textContent = statusMessage;
+        this.currentPlayer.textContent = 'Lượt: Chưa xác định';
+        this.updatePlayersInfo({});
+        this.updateRoomInfoUI();
+    }
+
+    openModal(modal) {
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    }
+
+    closeModal(modal) {
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'error' ? '#f44336' : '#4caf50'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
   
 
