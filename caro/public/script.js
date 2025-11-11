@@ -189,7 +189,34 @@ class CaroGame {
             }
         }
     }
+    makeMove(row, col) {
+        if (!this.gameState) {
+            this.showNotification('Game chưa được khởi tạo', 'error');
+            return;
+        }
+        
+        if (row < 0 || row >= 15 || col < 0 || col >= 15) {
+            this.showNotification('Vị trí không hợp lệ', 'error');
+            return;
+        }
+        
+        if (this.gameState.gameStatus !== 'playing') {
+            this.showNotification('Game chưa bắt đầu hoặc đã kết thúc', 'error');
+            return;
+        }
+        
+        if (this.gameState.currentPlayer !== this.playerSymbol) {
+            this.showNotification('Không phải lượt của bạn', 'error');
+            return;
+        }
+        
+        if (this.gameState.board[row][col] !== null) {
+            this.showNotification('Ô này đã có quân', 'error');
+            return;
+        }
 
+        this.socket.emit('makeMove', { row, col });
+    }
     
  updateGameDisplay() {
         if (!this.gameState) {
