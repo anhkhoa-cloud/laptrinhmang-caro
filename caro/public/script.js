@@ -175,6 +175,21 @@ class CaroGame {
         }
     }
 
+
+    createBoard() {
+        this.gameBoard.innerHTML = '';
+        for (let row = 0; row < 15; row++) {
+            for (let col = 0; col < 15; col++) {
+                const cell = document.createElement('button');
+                cell.className = 'cell';
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                cell.addEventListener('click', () => this.makeMove(row, col));
+                this.gameBoard.appendChild(cell);
+            }
+        }
+    }
+
     
  updateGameDisplay() {
         if (!this.gameState) {
