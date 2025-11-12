@@ -176,6 +176,104 @@ class CaroGame {
     }
 
     //setupSocketListeners
+    setupSocketListeners() {
+        this.socket.on('roomCreated', ({ roomId }) => {
+            this.roomId = roomId;
+            this.toggleRoomActions(true);
+            this.setChatEnabled(true);
+            this.setLeaveRoomEnabled(true);
+            this.clearChat();
+            this.updateRoomInfoUI();
+            this.showNotification(`Đã tạo phòng ${roomId}. Hãy chia sẻ mã phòng cho bạn bè!`);
+        });
+
+        this.socket.on('playerJoined', (data) => {
+            this.playerId = data.playerId;
+            this.playerSymbol = data.symbol;
+            this.roomId = data.roomId || this.roomId;
+            this.toggleRoomActions(true);
+            this.setChatEnabled(true);
+            this.setLeaveRoomEnabled(true);
+            this.clearChat();
+            this.updateRoomInfoUI();
+            this.updatePlayersInfo(data.players || {});
+            this.showNotification(`Bạn đã tham gia phòng ${this.roomId} với ký hiệu ${data.symbol}`);
+        });
+
+        this.socket.on('gameUpdate', (gameState) => {
+            this.gameState = gameState;
+            if (gameState.roomId) {
+                this.roomId = gameState.roomId;
+            }
+            this.updateRoomInfoUI();
+            this.updateGameDisplay();
+        });
+
+        this.socket.on('gameStarted', (gameState) => {
+            this.gameState = gameState;
+            if (gameState.roomId) {
+                this.roomId = gameState.roomId;
+            }
+            this.updateRoomInfoUI();
+            this.updateGameDisplay();
+            this.showNotification('Game đã bắt đầu!');
+        });
+
+        this.socket.on('gameFinished', (data) => {
+            this.highlightWinningCells(data);
+            this.showGameOver(data);
+        });
+
+        this.socket.on('gameReset', (gameState) => {
+            this.gameState = gameState;
+            this.updateGameDisplay();
+            this.clearBoard();
+            this.showNotification('Phòng đã bắt đầu ván mới!');
+        });
+
+        this.socket.on('gameFull', () => {
+            this.showNotification('Phòng đã đủ người!', 'error');
+        });
+
+        this.socket.on('chatMessage', (data) => {
+            this.addChatMessage(data);
+        });
+
+        this.socket.on('playerLeft', ({ players, message }) => {
+            this.updatePlayersInfo(players || {});
+            this.updateRoomInfoUI();
+            if (message) {
+                this.showNotification(message, 'error');
+            }
+        });
+
+        this.socket.on('roomClosed', ({ message }) => {
+            this.showNotification(message || 'Phòng đã đóng.', 'error');
+            this.resetClientState('Phòng đã đóng. Tạo hoặc tham gia phòng mới.');
+        });
+
+        this.socket.on('roomLeft', ({ message }) => {
+            this.resetClientState('Bạn đã rời phòng. Hãy tạo hoặc tham gia phòng mới.');
+            if (message) {
+                this.showNotification(message);
+            } else {
+                this.showNotification('Bạn đã rời phòng.');
+            }
+        });
+
+        this.socket.on('error', (message) => {
+            this.showNotification(message, 'error');
+        });
+
+        this.socket.on('connect', () => {
+            this.showNotification('Đã kết nối với server');
+        });
+
+        this.socket.on('disconnect', () => {
+            this.showNotification('Mất kết nối với server', 'error');
+            this.resetClientState('Mất kết nối với server.');
+        });
+    }
 
     createBoard() {
         this.gameBoard.innerHTML = '';
